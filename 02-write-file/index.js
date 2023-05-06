@@ -1,19 +1,26 @@
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 const { stdin, stdout } = process;
 
-stdout.write('Hi! Write down some text to fillfull a new file\n');
-const output = fs.createWriteStream(path.join(__dirname, 'result.text'));
-stdin.on('data', (data) => {
-  const strData = data.toString().slice(0, 4);
-  if (strData.slice(0, 4) === 'exit') {
-    process.exit();
+const rl = readline.createInterface({
+  input: stdin,
+  output: stdout
+});
+
+console.log('Hi! Type some text to fillfull a file');
+const output = fs.createWriteStream(path.resolve(__dirname, 'result.txt'));
+
+rl.on('line', (line) => {
+  const text = line.trim();
+  if(text === 'exit') {
+    rl.close();
+  } else {
+    output.write(`${text}\n`);
   }
-});
-stdin.pipe(output);
-process.on('SIGINT', () => {
+}).on('SIGINT', () => {
+  rl.close();
+}).on('close', () => {
+  console.log('File is fullfiiled. Bye!');
   process.exit();
-});
-process.on('exit', () => {
-  stdout.write('File is fullfilled. Check it out. Bye!');
 });
